@@ -57,18 +57,15 @@ passport.use(
           console.log("user is: ", currentUser);
           done(null, currentUser);
         } else {
-          new user({
+          const newUser = new user({
             facebookId: profile.id,
             displayName: profile.displayName,
-            // name:profile.name,
-            // picture:profile.picture,
-            // emails:profile.emails
-          })
-            .save()
-            .then((newUser) => {
-              console.log("created new user:", newUser);
-              done(null, newUser);
-            });
+          });
+
+          newUser.save().then((savedUser) => {
+            console.log("created new user:", savedUser);
+            done(null, savedUser);
+          });
         }
       });
     }
