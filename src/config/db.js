@@ -20,7 +20,7 @@ db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
 db.user = require("../routes/model")(sequelize, Sequelize);
-
+db.facebookUser =require("../routes/facebookModel")(sequelize, Sequelize);
 sequelize.sync({ force: false }).then(() => {
   console.log("yes re-sync done");
 });

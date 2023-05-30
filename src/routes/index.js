@@ -51,8 +51,26 @@ passport.use(
       callbackURL: "/facebook",
       profileFields: ["emails", "displayName", "name", "picture"],
     },
-    (accessToken, refreshToken, profile, callback) => {
-      callback(null, profile);
+    (accessToken, refreshToken, profile, done) => {
+      user.findOne({ facebookId: profile.id }).then((currentUser) => {
+        if (currentUser) {
+          console.log("user is: ", currentUser);
+          done(null, currentUser);
+        } else {
+          new user({
+            facebookId: profile.id,
+            displayName: profile.displayName,
+            // name:profile.name,
+            // picture:profile.picture,
+            // emails:profile.emails
+          })
+            .save()
+            .then((newUser) => {
+              console.log("created new user:", newUser);
+              done(null, newUser);
+            });
+        }
+      });
     }
   )
 );
