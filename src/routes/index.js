@@ -6,7 +6,7 @@ const expressSession = require("express-session");
 const AppleStrategy = require("passport-apple");
 const db = require("../config/db");
 const user = db.user;
-
+const facebookUser=db.facebookUser;
 const app = express();
 
 const GOOGLE_CLIENT_ID =
@@ -49,23 +49,24 @@ passport.use(
       clientID: FACEBOOK_CLIENT_ID,
       clientSecret: FACEBOOK_CLIENT_SECRET,
       callbackURL: "/facebook",
-      profileFields: ["emails", "displayName", "name", "picture"],
+      // profileFields: ["emails", "displayName", "name", "picture"],
     },
     (accessToken, refreshToken, profile, done) => {
-      user.findOne({ facebookId: profile.id }).then((currentUser) => {
+      facebookUser.findOne({ facebookId: profile.id }).then((currentUser) => {
         if (currentUser) {
           console.log("user is: ", currentUser);
           done(null, currentUser);
         } else {
-          const newUser = new user({
+          new facebookUser({
             facebookId: profile.id,
-            displayName: profile.displayName,
-          });
+            name: profile.displayName,
+            email: profile.emails,
 
-          newUser.save().then((savedUser) => {
-            console.log("created new user:", savedUser);
-            done(null, savedUser);
-          });
+          })
+            .save().then((savedUser) => {
+              console.log("created new user:", savedUser);
+              done(null, savedUser);
+            });
         }
       });
     }
@@ -112,7 +113,7 @@ app.get(
 );
 app.get(
   "/login/facebook",
-  passport.authenticate("facebook", { scope: ["email"] })
+  passport.authenticate("facebook", { scope: [ "email"] })
 );
 app.get("/google", passport.authenticate("google"), (req, res) => {
   res.redirect("/");
